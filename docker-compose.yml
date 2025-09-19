@@ -1,0 +1,35 @@
+version: "3.9"
+
+services:
+  db:
+    image: postgres:16
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: kanoon_kendra
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - db_data:/var/lib/postgresql/data
+
+  app:
+    build: .
+    depends_on:
+      - db
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/kanoon_kendra
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: postgres
+      APP_JWT_SECRET: ${APP_JWT_SECRET:-CFRhLFuz/qDVxWpcJSPG5rU09K7f0MbQX43gm6mDII8=}
+      APP_JWT_EXPIRATION_MS: ${APP_JWT_EXPIRATION_MS:-86400000}
+      APP_JWT_REFRESH_EXPIRATION_MS: ${APP_JWT_REFRESH_EXPIRATION_MS:-604800000}
+      APP_CORS_ALLOWED_ORIGINS: ${APP_CORS_ALLOWED_ORIGINS:-http://localhost:3000}
+      APP_ADMIN_USERNAME: ${APP_ADMIN_USERNAME:-admin}
+      APP_ADMIN_PASSWORD: ${APP_ADMIN_PASSWORD:-Admin@123}
+    ports:
+      - "8080:8080"
+    restart: unless-stopped
+
+volumes:
+  db_data:
