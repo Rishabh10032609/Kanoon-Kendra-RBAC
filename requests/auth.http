@@ -1,0 +1,46 @@
+@baseUrl = http://localhost:8080
+@username = Rishabh
+@password = Password@123
+@deviceId = web-1
+
+### Register (ignore error if already exists)
+POST {{baseUrl}}/api/auth/register
+Content-Type: application/json
+
+{
+  "username": "{{username}}",
+  "password": "{{password}}",
+  "deviceId": "{{deviceId}}"
+}
+
+### Login
+# @name login
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "username": "{{username}}",
+  "password": "{{password}}",
+  "deviceId": "{{deviceId}}"
+}
+
+### Protected endpoint using access token from Login
+GET {{baseUrl}}/api/hello
+Authorization: Bearer {{login.response.body.$.accessToken}}
+
+### Refresh access token
+# @name refresh
+POST {{baseUrl}}/api/auth/refresh
+Content-Type: application/json
+
+{
+  "refreshToken": "{{login.response.body.$.refreshToken}}"
+}
+
+### Use refreshed access token
+GET {{baseUrl}}/api/hello
+Authorization: Bearer {{refresh.response.body.$.accessToken}}
+
+### Logout all devices (remove deviceId param) or a specific device
+POST {{baseUrl}}/api/auth/logout?deviceId={{deviceId}}
+Authorization: Bearer {{refresh.response.body.$.accessToken}}
