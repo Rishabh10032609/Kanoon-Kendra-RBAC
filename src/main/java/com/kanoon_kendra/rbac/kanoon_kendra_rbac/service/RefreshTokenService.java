@@ -21,9 +21,9 @@ public class RefreshTokenService {
 
     public RefreshToken issue(User user, String deviceId) {
         // Keep at most one active token per user+device
-        if (deviceId != null && !deviceId.isBlank()) {
-            refreshTokenRepository.deleteByUserAndDeviceId(user, deviceId);
-        }
+        // if (deviceId != null && !deviceId.isBlank()) {
+        //     refreshTokenRepository.deleteByUserAndDeviceId(user, deviceId);
+        // }
         RefreshToken token = RefreshToken.builder()
                 .user(user)
                 .deviceId(deviceId)

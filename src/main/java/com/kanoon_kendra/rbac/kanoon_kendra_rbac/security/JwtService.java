@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 
 import java.security.Key;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 
 @Service
@@ -30,7 +31,21 @@ public class JwtService {
     }
 
     public String generateToken(UserDetails userDetails) {
-        return generateToken(Map.of(), userDetails);
+        List<String> roles = userDetails.getAuthorities()
+            .stream()
+            .map(org.springframework.security.core.GrantedAuthority::getAuthority)
+            .toList();
+    Map<String, Object> claims = Map.of("roles", roles);
+    return generateToken(claims, userDetails);
+    }
+
+    public List<String> extractRoles(String token) {
+        Object val = parseClaims(token).get("roles");
+        if (val instanceof List<?> list) {
+            // The list will be List<String> after parsing
+            return list.stream().map(Object::toString).toList();
+        }
+        return List.of();
     }
 
     public String generateToken(Map<String, Object> extraClaims, UserDetails userDetails) {

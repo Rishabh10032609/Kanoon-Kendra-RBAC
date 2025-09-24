@@ -47,6 +47,32 @@ public class DataInitializer implements CommandLineRunner {
                         .build();
                 userRepository.save(admin);
                 log.info("Seeded admin user: {}", adminUsername);
+            } else {
+                // Ensure existing admin user has required roles
+                User existing = userRepository.findByUsername(adminUsername)
+                        .orElseThrow(() -> new IllegalStateException("Configured admin user not found after existence check"));
+                boolean updated = false;
+
+                boolean hasAdmin = existing.getRoles().stream()
+                        .anyMatch(r -> "ROLE_ADMIN".equals(r.getName()));
+                boolean hasUser = existing.getRoles().stream()
+                        .anyMatch(r -> "ROLE_USER".equals(r.getName()));
+
+                if (!hasAdmin) {
+                    existing.getRoles().add(roleAdmin);
+                    updated = true;
+                }
+                if (!hasUser) {
+                    existing.getRoles().add(roleUser);
+                    updated = true;
+                }
+
+                if (updated) {
+                    userRepository.save(existing);
+                    log.info("Ensured admin roles for existing user: {}", adminUsername);
+                } else {
+                    log.info("Existing admin user already has required roles: {}", adminUsername);
+                }
             }
         } else {
             log.info("Admin user not seeded. Set app.admin.username and app.admin.password to seed.");
